@@ -18,21 +18,18 @@ function trident
     switch $argv[1]
         case jump -j
             set -l entry (sed -n "$argv[2]p" "$TRIDENT_JUMP_FILE" 2>/dev/null)
-            if test -d "$entry"
-                cd "$entry"
-            else if test -f "$entry"
-                eval $EDITOR (string escape -- $entry)
-            else
+            if test -z "$entry"
                 echo "trident: slot $argv[2] is empty or path no longer exists." >&2
                 return 1
             end
+            eval $entry
 
         case add -a
             if test (count $argv) -ge 2
                 set -l file (pwd)/$argv[2]
                 if test -f "$file"
                     echo "trident: adding file: $file"
-                    echo "$file" >> "$TRIDENT_JUMP_FILE"
+                    echo "\$EDITOR $file" >> "$TRIDENT_JUMP_FILE"
                 else
                     echo "trident: file not found: $file" >&2
                     return 1
@@ -40,7 +37,7 @@ function trident
             else
                 set -l dir (pwd)/
                 echo "trident: adding dir: $dir"
-                echo "$dir" >> "$TRIDENT_JUMP_FILE"
+                echo "cd $dir" >> "$TRIDENT_JUMP_FILE"
             end
 
         case edit -e

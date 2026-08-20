@@ -13,31 +13,11 @@ trident() {
 
     case "$1" in
         jump|-j)
-            local dir
-            dir=$(sed -n "${2}p" "$TRIDENT_JUMP_FILE" 2>/dev/null)
-            if [ -d "$dir" ]; then
-                cd "$dir"
-            elif [ -f "$dir" ]; then
-                "$EDITOR" "$dir"
-            else
-                echo "trident: slot $2 is empty or path no longer exists." >&2
-                return 1
-            fi
+            eval $(sed -n "${2}p" "$TRIDENT_JUMP_FILE" 2>/dev/null)
             ;;
         add|-a)
-            if [ -n "$2" ]; then
-                local file="$(pwd)/$2"
-                if [ -f "$file" ]; then
-                    echo "trident: adding file: $file"
-                    echo "$file" >> "$TRIDENT_JUMP_FILE"
-                else
-                    echo "trident: file not found: $file" >&2
-                    return 1
-                fi
-            else
-                echo "trident: adding dir: $(pwd)/"
-                echo "$(pwd)/" >> "$TRIDENT_JUMP_FILE"
-            fi
+            echo "trident: adding dir: $(pwd)/"
+            echo "cd $(pwd)/" >> "$TRIDENT_JUMP_FILE"
             ;;
         edit|-e)
             "$EDITOR" "$TRIDENT_JUMP_FILE"
